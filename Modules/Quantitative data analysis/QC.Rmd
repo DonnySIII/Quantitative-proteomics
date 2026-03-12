@@ -5,8 +5,8 @@ output:
   html_document
 params:
   quantif_file: "../../Example/Datasets/QC-DA/Parsed_proteins_set.txt"
-  design_exp: "../../Example/Datasets/QC-DA/exp_design.txt"
-  parameters: "../../Example/Datasets/QC-DA/QC_parameters.txt"
+  design_exp: ""
+  parameters: ""
 ---
 
 <style type="text/css">

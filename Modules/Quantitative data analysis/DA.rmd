@@ -6,7 +6,7 @@ params:
   parameters: "../../Example/Datasets/QC-DA/Parameters.txt"
   design_exp: "../../Example/Datasets/QC-DA/designExp.txt"
   output_dir: "../../Example/Reports/"
-  proline_source_file: none
+  proline_source_file: "none"
   proline_sheet: 4
 output:
   html_document:
@@ -332,22 +332,6 @@ if (normalization){
     normalized_abundance = normalize(raw_abundance,reference_sample)
   }
   
-  cat("Before merge: nrow(data) =", nrow(data), "\n")
-  cat("Before merge: nrow(normalized_abundance) =", nrow(normalized_abundance), "\n")
-  
-  cat("Id class (data):", class(data$Id), "\n")
-  cat("Id class (norm):", class(normalized_abundance$Id), "\n")
-  
-  cat("Unique Ids (data):", length(unique(data$Id)), "\n")
-  cat("Unique Ids (norm):", length(unique(normalized_abundance$Id)), "\n")
-  
-  overlap <- intersect(as.character(data$Id), as.character(normalized_abundance$Id))
-  cat("Overlap Ids:", length(overlap), "\n")
-  
-  if (length(overlap) == 0) {
-    cat("Example Ids in data:\n"); print(head(as.character(data$Id), 10))
-    cat("Example Ids in normalized_abundance:\n"); print(head(as.character(normalized_abundance$Id), 10))
-  }
   
   data = merge.data.frame(data,normalized_abundance,by="Id")
   normalized_abundance = normalized_abundance[,grepl("_norm",colnames(normalized_abundance))]
