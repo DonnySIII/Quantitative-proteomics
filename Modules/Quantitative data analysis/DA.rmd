@@ -1,10 +1,6 @@
 
 ---
-output:
-  html_document:
-    pandoc_args: [
-      "+RTS","-K1024m","-RTS"
-    ]
+title: "Differential analysis"
 params:
   quant_df: "../../Example/Datasets/QC-DA/Parsed_proteins_set.txt"
   parameters: "../../Example/Datasets/QC-DA/Parameters.txt"
@@ -12,7 +8,13 @@ params:
   output_dir: "../../Example/Reports/"
   proline_source_file: "none"
   proline_sheet: 4
-title: "Differential analysis"
+output:
+  html_document:
+    pandoc_args:
+    - +RTS
+    - "-K1024m"
+    - "-RTS"
+  pdf_document: default
 ---
 
 <style type="text/css">
@@ -329,6 +331,8 @@ if (normalization){
   }else{
     normalized_abundance = normalize(raw_abundance,reference_sample)
   }
+  
+  
   data = merge.data.frame(data,normalized_abundance,by="Id")
   normalized_abundance = normalized_abundance[,grepl("_norm",colnames(normalized_abundance))]
   
@@ -631,7 +635,7 @@ if (normalization){
 ##na_percentage - Stores the percentage and count of missing values per group and for the entire data group##
 ##na_distribution - Stores the median and count of missing values in each row in a group##
 
-na_distribution = data.frame(median=numeric(),sums_na=numeric())
+na_distribution = data.frame(median=numeric(),sum_na=numeric())
 # medians = c()
 # sums_na = c()
 na_percentage = data.frame(Group=character(),na_percentage=character(),na_count=character())
@@ -798,9 +802,16 @@ imputed_abundance[imputed_abundance=="MCAR"] <- NA
 
 data = merge.data.frame(data,imputed_abundance,by="Id")
 
-imputed_abundance_log = imputed_abundance
-imputed_abundance_log[,2:ncol(imputed_abundance_log)] = log10(data.matrix(imputed_abundance_log[,2:ncol(imputed_abundance_log)]))
-colnames(imputed_abundance_log)[2:ncol(imputed_abundance_log)] = paste0(colnames(imputed_abundance)[2:ncol(imputed_abundance_log)],"_log")
+#imputed_abundance_log = imputed_abundance
+#imputed_abundance_log[,2:ncol(imputed_abundance_log)] = log10(data.matrix(imputed_abundance_log[,2:ncol(imputed_abundance_log)]))
+#colnames(imputed_abundance_log)[2:ncol(imputed_abundance_log)] = paste0(colnames(imputed_abundance)[2:ncol(imputed_abundance_log)],"_log")
+
+# Keep ID column, log transform the rest
+imputed_abundance_log = data.frame(
+  Id = imputed_abundance[,1],
+  log10(imputed_abundance[,2:ncol(imputed_abundance)])
+)
+colnames(imputed_abundance_log)[2:ncol(imputed_abundance_log)] = paste0(colnames(imputed_abundance)[2:ncol(imputed_abundance)],"_log")
 
 data = merge.data.frame(data,imputed_abundance_log,by="Id")
 
@@ -866,7 +877,7 @@ if(exists("gaussian_parameters")){
 
 
 ```{r global_filtering}
-##Parsing of data input file to seperate by specific peptides##
+##Parsing of data input file to separate by specific peptides##
 
 global_filtering <- filter_dataset(data, group_ids)
 
@@ -1792,7 +1803,7 @@ output_t <- output_t[indices, ]
 ```
 
 ```{r include=FALSE}
-# You need this code to conduct the magic dependences attaching...
+# You need this code to conduct the magic dependencies attaching...
 knitr::knit_print(DT::datatable(matrix(),
                                 extensions = 'Buttons',
                                 options = list(dom = 'Bfrtip',buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),scrollX = TRUE)))
@@ -1804,7 +1815,7 @@ knitr::knit_print(DT::datatable(matrix(),
 hm <- grep(".*_imputed_log$",colnames(output_t))
 
 if(params$proline_source_file == "none"){
-  data.table::fwrite(output_t,paste0(params$output_dir,"output_table.tsv"), row.names = F, sep = "\t")
+  data.table::fwrite(output_t,paste0(params$output_dir,"/output_table.tsv"), row.names = F, sep = "\t")
   #data.table::fwrite(output_t, params$output_table, row.names = F, sep = "\t")
 }else{
 
@@ -1866,7 +1877,7 @@ if(params$proline_source_file == "none"){
   }
 
   # Save the modified Excel file
-  exit_address <- paste0(as.character(params$output_dir), "DA_output_table.xlsx")
+  exit_address <- paste0(as.character(params$output_dir), "/DA_output_table.xlsx")
   # exit_address <- paste0("D:/dev/donald/R/Quantitative-proteomics/Modules/Quantitative data analysis/DA", "_output_table.xlsx")
   saveWorkbook(wb = existing_file, file = as.character(exit_address), overwrite = TRUE)
 }
